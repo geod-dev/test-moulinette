@@ -3,10 +3,16 @@ import subprocess
 import importlib.util
 import sys
 import re
+import difflib
 
 def match(got, expected):
     expected = re.escape(expected.strip()).replace('\\$\\*', '.*')
     return re.match(f'^{expected}$', got.strip()) is not None
+
+def display_string_diff(string1, string2):
+    d = difflib.Differ()
+    diff = d.compare(string1.splitlines(), string2.splitlines())
+    print('\n'.join(diff))
 
 root = os.path.dirname(os.path.abspath(__file__)) + "/tests/"
 days = []
@@ -34,4 +40,7 @@ for test_file in os.listdir(folder):
             print(test.OUTPUT.strip())
             print("\ngot:")
             print(output.strip())
+            print("\n\n")
+            print(display_string_diff(output, test.OUTPUT))
             break
+            
