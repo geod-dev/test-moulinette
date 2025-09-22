@@ -2,6 +2,11 @@ import os
 import subprocess
 import importlib.util
 import sys
+import re
+
+def match(got, expected):
+    expected = re.escape(expected.strip()).replace('\\$\\*', '.*')
+    return re.match(f'^{expected}$', got.strip()) is not None
 
 root = os.path.dirname(os.path.abspath(__file__)) + "/tests/"
 days = []
@@ -21,12 +26,12 @@ for test_file in os.listdir(folder):
         test = importlib.util.module_from_spec(test_spec)
         test_spec.loader.exec_module(test)
         output = subprocess.run(test.COMMAND, shell=True, capture_output=True).stdout.decode(sys.stdout.encoding)
-        if output.strip() == test.OUTPUT.strip():
+        if match(output, test.OUTPUT):
             print(f"TEST {test_file} PASSED !")
         else:
             print(f"TEST {test_file} FAILED !")
-            print("expected:")
-            print(test.OUTPUT)
-            print("\n\ngot:")
-            print(output)
+            print("\nexpected:")
+            print(test.OUTPUT.strip())
+            print("\ngot:")
+            print(output.strip())
             break
