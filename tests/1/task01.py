@@ -1,0 +1,1 @@
+COMMAND = "ls -la task
