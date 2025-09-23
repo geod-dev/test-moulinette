@@ -26,7 +26,7 @@ day = input("which day ?")
 
 folder = os.path.join(root, day)
 
-for test_file in os.listdir(folder):
+for test_file in sorted(os.listdir(folder)):
     if test_file.startswith("test_"):
         test_spec = importlib.util.spec_from_file_location(test_file.replace(".py", ""), os.path.join(folder, test_file))
         test = importlib.util.module_from_spec(test_spec)
