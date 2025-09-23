@@ -14,6 +14,40 @@ def display_string_diff(string1, string2):
     diff = d.compare(string1.splitlines(), string2.splitlines())
     print('\n'.join(diff))
 
+def check_output(n, output, expected):
+    if type(expected) == str:
+        return check_single_output(n, output, expected)
+    else:
+        passed = False
+        for e in expected:
+            if check_single_output(n, output, e, False):
+                passed = True
+                break
+        if not passed:
+            print(f"TEST {n} FAILED !")
+            print("\ngot:")
+            print(output.strip())
+            for e in expected:
+                print("\nexpected:")
+                print(e)
+            print("\n\n")     
+        return passed
+
+def check_single_output(n, output, expected, verbose = True):
+    if match(output, expected):
+        if verbose:
+            print(f"TEST {n} PASSED !")
+        return True
+    if verbose:
+        print(f"TEST {n} FAILED !")
+        print("\nexpected:")
+        print(expected.strip())
+        print("\ngot:")
+        print(output.strip())
+        print("\n\n")
+        print(display_string_diff(output, expected))
+    return False
+
 root = os.path.dirname(os.path.abspath(__file__)) + "/tests/"
 days = []
 
@@ -32,15 +66,6 @@ for test_file in sorted(os.listdir(folder)):
         test = importlib.util.module_from_spec(test_spec)
         test_spec.loader.exec_module(test)
         output = subprocess.run(test.COMMAND, shell=True, capture_output=True).stdout.decode(sys.stdout.encoding)
-        if match(output, test.OUTPUT):
-            print(f"TEST {test_file} PASSED !")
-        else:
-            print(f"TEST {test_file} FAILED !")
-            print("\nexpected:")
-            print(test.OUTPUT.strip())
-            print("\ngot:")
-            print(output.strip())
-            print("\n\n")
-            print(display_string_diff(output, test.OUTPUT))
+        if not check_output(test_file, output, test.OUTPUT):
             break
             
